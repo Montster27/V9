@@ -1,12 +1,16 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
 import timeReducer from './slices/timeSlice';
+import useOfTimeReducer from './slices/useOfTimeSlice';
+import narrativeReducer from './slices/narrativeSlice';
 // Import other reducers as they are created
 // import resourcesReducer from './slices/resourcesSlice';
 
 export const store = configureStore({
   reducer: {
     time: timeReducer,
+    useOfTime: useOfTimeReducer,
+    narrative: narrativeReducer,
     // resources: resourcesReducer,
     // Add more reducers as they are created
   },
@@ -14,8 +18,17 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: {
         // Ignore TimeValue objects in actions and state
-        ignoredActions: ['time/setGameTime'],
-        ignoredPaths: ['time.managerState.currentTime'],
+        ignoredActions: [
+          'time/setGameTime', 
+          'useOfTime/connectTimeManager',
+          'useOfTime/initializeUseOfTimeManager',
+          'narrative/discoverClue'  // Date objects need to be ignored
+        ],
+        ignoredPaths: [
+          'time.managerState.currentTime',
+          'useOfTime.managerState.currentAllocation',
+          'narrative.discoveredClues', // Contains Date objects
+        ],
       },
     }),
 });

@@ -5,7 +5,7 @@ import {
   TimelineBranch
 } from '../../../domain/types/narrative';
 import { NarrativeArc } from '../../../domain/models/Narrative';
-import { GameEvent } from '../../../domain/types';
+import { GameEvent } from '../../../domain/types/index';
 
 // Define the initial state
 const initialState: NarrativeProgress = {

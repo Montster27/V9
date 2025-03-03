@@ -6,7 +6,7 @@ import {
   MysteryEventTrigger,
   ConspiracyEventTrigger
 } from '../types/narrative';
-import { GameEvent, EventChoice, EventEffect } from '../types';
+import { GameEvent, EventChoice, EventEffect } from '../types/index';
 
 /**
  * Represents a narrative arc in the game

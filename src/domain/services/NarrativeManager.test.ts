@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NarrativeManager } from './NarrativeManager';
 import { NarrativeFactory } from '../models/Narrative';
 import { NarrativeType, TriggerType } from '../types/narrative';
-import { GameEvent } from '../types';
+import { GameEvent } from '../types/index';
 
 describe('NarrativeManager', () => {
   let narrativeManager: NarrativeManager;

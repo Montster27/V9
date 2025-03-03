@@ -13,7 +13,7 @@ import {
   TriggerType
 } from '../types/narrative';
 
-import { GameEvent, EventEffect } from '../types';
+import { GameEvent, EventEffect } from '../types/index';
 
 /**
  * Manages the narrative progression, conspiracy discovery, and timeline alterations
@@ -81,7 +81,7 @@ export class NarrativeManager {
   /**
    * Process events based on current game state
    */
-  public processEvents(gameState: any): GameEvent[] {
+  public processEvents(gameState: Record<string, any>): GameEvent[] {
     const triggeredEvents: GameEvent[] = [];
     
     for (const event of this.eventQueue) {
@@ -107,7 +107,7 @@ export class NarrativeManager {
   /**
    * Check if an event's trigger conditions are met
    */
-  private checkEventTrigger(event: GameEvent, gameState: any): boolean {
+  private checkEventTrigger(event: GameEvent, gameState: Record<string, any>): boolean {
     // Implementation would check specific trigger types
     // This is a simplified version
     
@@ -687,7 +687,7 @@ export class NarrativeManager {
    * Connect an event to news feed
    * This would create a news item based on an event or clue discovery
    */
-  public createNewsItem(source: GameEvent | Clue, discoveryDate: Date): any {
+  public createNewsItem(source: GameEvent | Clue, discoveryDate: Date): Record<string, unknown> {
     // This is a placeholder implementation
     // In a real implementation, this would create a news item
     // and add it to the news feed

@@ -1,19 +1,20 @@
 /**
- * /src/domain/services/UseOfTimeManager.ts
- * 
- * UseOfTimeManager Service
- * 
- * Manages weekly time allocation, resource calculations, and skill point costs
- * for the Middle Age Multiverse game. This service provides methods to distribute
- * time across different activities, calculate resource impacts, and handle the
- * interaction between time allocation and game progression.
+ * /src/domain/services/UseOfTimeManager.optimized.ts
+ *
+ * Optimized UseOfTimeManager Service
+ *
+ * Performance improvements:
+ * - Memoized resource impact calculations
+ * - Optimized event system
+ * - Reduced object creation
+ * - Cached skill cost calculations
  */
 
 import { TimeManager, TimeEventType, TimeEventData } from './TimeManager';
-import { 
-  ActivityType, 
-  WeeklyTimeAllocation, 
-  TimeAllocation, 
+import {
+  ActivityType,
+  WeeklyTimeAllocation,
+  TimeAllocation,
   ResourceImpact,
   createDefaultTimeAllocation,
   adjustTimeAllocation,
@@ -80,14 +81,33 @@ export interface UseOfTimeEventData {
 }
 
 /**
- * UseOfTimeManager handles weekly time allocation, resource calculations,
+ * Cache key for skill cost calculations
+ */
+interface SkillCostCacheKey {
+  baseSkillCost: number;
+  tier: number;
+  previousSkillsInThread: number;
+  threadName: string;
+}
+
+/**
+ * Optimized UseOfTimeManager handles weekly time allocation, resource calculations,
  * and skill point costs for activities.
  */
 export class UseOfTimeManager {
   private config: UseOfTimeManagerConfig;
   private state: UseOfTimeManagerState;
   private timeManager?: TimeManager;
-  private eventListeners: Map<UseOfTimeEventType, Array<(data: UseOfTimeEventData) => void>>;
+
+  // Use Sets for faster event listener operations
+  private eventListeners: Map<UseOfTimeEventType, Set<(data: UseOfTimeEventData) => void>>;
+
+  // Cache for resource impact calculations
+  private resourceImpactCache: Map<string, ResourceImpact> = new Map();
+
+  // Cache for skill cost calculations (limited size)
+  private skillCostCache: Map<string, number> = new Map();
+  private readonly SKILL_COST_CACHE_SIZE = 100;
 
   /**
    * Creates a new UseOfTimeManager instance
@@ -99,22 +119,22 @@ export class UseOfTimeManager {
       baseSkillCost: 10,
       tierScalingFactor: 2,
       threadProgressionFactor: 0.1,
-      ...config
+      ...config,
     };
 
     // Initialize time manager connection if provided
     this.timeManager = config?.timeManager;
 
-    // Initialize event listeners
+    // Initialize event listeners using Sets for faster operations
     this.eventListeners = new Map();
-    Object.values(UseOfTimeEventType).forEach(eventType => {
-      this.eventListeners.set(eventType, []);
+    Object.values(UseOfTimeEventType).forEach((eventType) => {
+      this.eventListeners.set(eventType, new Set());
     });
 
     // Create initial allocation or use provided one
     const initialAllocation = config?.initialAllocation || createDefaultTimeAllocation();
     const validation = validateTimeAllocation(initialAllocation);
-    
+
     // Calculate initial resource impacts
     const resourceImpacts = calculateResourceImpact(initialAllocation);
     const stressPenalties = calculateStressPenalties(initialAllocation);
@@ -148,10 +168,7 @@ export class UseOfTimeManager {
     );
 
     // Listen for day changes to apply daily effects
-    this.timeManager.addEventListener(
-      TimeEventType.DAY_CHANGED,
-      this.handleDayChanged.bind(this)
-    );
+    this.timeManager.addEventListener(TimeEventType.DAY_CHANGED, this.handleDayChanged.bind(this));
   }
 
   /**
@@ -178,9 +195,24 @@ export class UseOfTimeManager {
    * @returns Calculated resource impact for the elapsed time
    */
   public calculateHourlyResourceImpact(elapsedHours: number): ResourceImpact {
+    // Skip calculation if elapsed hours is 0
+    if (elapsedHours === 0) {
+      return { knowledge: 0, money: 0, social: 0, energy: 0, stress: 0 };
+    }
+
+    // Check cache for common hour values (whole numbers)
+    if (Number.isInteger(elapsedHours)) {
+      const cacheKey = `hours_${elapsedHours}`;
+      const cachedImpact = this.resourceImpactCache.get(cacheKey);
+
+      if (cachedImpact) {
+        return { ...cachedImpact };
+      }
+    }
+
     // Calculate the proportion of a week this represents
     const weekProportion = elapsedHours / (24 * 7);
-    
+
     // Scale the weekly impact by this proportion
     const weeklyImpact = this.state.resourceImpacts;
     const scaledImpact: ResourceImpact = {
@@ -188,14 +220,31 @@ export class UseOfTimeManager {
       money: weeklyImpact.money * weekProportion,
       social: weeklyImpact.social * weekProportion,
       energy: weeklyImpact.energy * weekProportion,
-      stress: weeklyImpact.stress * weekProportion + (this.state.stressPenalties * weekProportion),
+      stress: weeklyImpact.stress * weekProportion + this.state.stressPenalties * weekProportion,
     };
-    
+
+    // Cache the result for whole numbers of hours (common case)
+    if (Number.isInteger(elapsedHours)) {
+      const cacheKey = `hours_${elapsedHours}`;
+      this.resourceImpactCache.set(cacheKey, { ...scaledImpact });
+
+      // Limit cache size
+      if (this.resourceImpactCache.size > 24) {
+        // Remove oldest entries using Array.from instead of spread to avoid TS2802 error
+        const keysToRemove = Array.from(this.resourceImpactCache.keys()).filter((key) => {
+          const hourValue = parseInt(key.split('_')[1]);
+          return hourValue > 24;
+        });
+
+        keysToRemove.forEach((key) => this.resourceImpactCache.delete(key));
+      }
+    }
+
     // Emit resource impact calculated event
     this.emitEvent(UseOfTimeEventType.RESOURCE_IMPACT_CALCULATED, {
       state: this.getState(),
     });
-    
+
     return scaledImpact;
   }
 
@@ -205,11 +254,14 @@ export class UseOfTimeManager {
    * @param hoursPerDay New hours per day for the activity
    * @returns Updated state
    */
-  public updateAllocation(
-    activityType: ActivityType,
-    hoursPerDay: number
-  ): UseOfTimeManagerState {
+  public updateAllocation(activityType: ActivityType, hoursPerDay: number): UseOfTimeManagerState {
     try {
+      // Skip update if allocation hasn't changed
+      const currentHours = this.state.currentAllocation.allocations[activityType].hoursPerDay;
+      if (currentHours === hoursPerDay) {
+        return { ...this.state };
+      }
+
       // Validate input
       if (hoursPerDay < 0 || hoursPerDay > 24) {
         throw new Error(`Hours per day must be between 0 and 24, got ${hoursPerDay}`);
@@ -239,6 +291,9 @@ export class UseOfTimeManager {
         lastUpdated: Date.now(),
       };
 
+      // Clear resource impact cache since allocations changed
+      this.resourceImpactCache.clear();
+
       // Emit allocation changed event
       this.emitEvent(UseOfTimeEventType.ALLOCATION_CHANGED, {
         state: this.getState(),
@@ -248,13 +303,13 @@ export class UseOfTimeManager {
       return { ...this.state };
     } catch (error) {
       // Log and emit error
-      console.error("Error updating allocation:", error);
+      console.error('Error updating allocation:', error);
       this.emitEvent(UseOfTimeEventType.ERROR_OCCURRED, {
         state: this.getState(),
         activityType,
         error: error instanceof Error ? error.message : String(error),
       });
-      
+
       return { ...this.state };
     }
   }
@@ -278,6 +333,9 @@ export class UseOfTimeManager {
       lastUpdated: Date.now(),
     };
 
+    // Clear resource impact cache since allocations changed
+    this.resourceImpactCache.clear();
+
     // Emit allocation changed event
     this.emitEvent(UseOfTimeEventType.ALLOCATION_CHANGED, {
       state: this.getState(),
@@ -299,20 +357,36 @@ export class UseOfTimeManager {
     previousSkillsInThread: number,
     threadName: string
   ): number {
+    // Check cache first
+    const cacheKey = `${baseSkillCost}-${tier}-${previousSkillsInThread}-${threadName}`;
+    const cachedCost = this.skillCostCache.get(cacheKey);
+
+    if (cachedCost !== undefined) {
+      return cachedCost;
+    }
+
     // Apply exponential scaling based on tier
-    const tierMultiplier = Math.pow(
-      this.config.tierScalingFactor || 2, 
-      tier - 1
-    ); // 1x for tier 1, 2x for tier 2, 4x for tier 3
-    
+    const tierMultiplier = Math.pow(this.config.tierScalingFactor || 2, tier - 1); // 1x for tier 1, 2x for tier 2, 4x for tier 3
+
     // Apply additional scaling based on how many skills already acquired
-    const progressionScaling = 1 + (
-      previousSkillsInThread * (this.config.threadProgressionFactor || 0.1)
-    ); 
-    
+    const progressionScaling =
+      1 + previousSkillsInThread * (this.config.threadProgressionFactor || 0.1);
+
     // Calculate final cost
     const cost = Math.floor(baseSkillCost * tierMultiplier * progressionScaling);
-    
+
+    // Cache the result
+    this.skillCostCache.set(cacheKey, cost);
+
+    // Maintain cache size
+    if (this.skillCostCache.size > this.SKILL_COST_CACHE_SIZE) {
+      // Remove oldest entry (FIFO)
+      const firstKey = this.skillCostCache.keys().next().value;
+      if (firstKey !== undefined) {
+        this.skillCostCache.delete(firstKey);
+      }
+    }
+
     // Emit skill cost calculated event
     this.emitEvent(UseOfTimeEventType.SKILL_COST_CALCULATED, {
       state: this.getState(),
@@ -320,7 +394,7 @@ export class UseOfTimeManager {
       skillThreadName: threadName,
       skillCost: cost,
     });
-    
+
     return cost;
   }
 
@@ -342,12 +416,13 @@ export class UseOfTimeManager {
    * @param callback Callback function to execute when event occurs
    */
   public addEventListener(
-    eventType: UseOfTimeEventType, 
+    eventType: UseOfTimeEventType,
     callback: (data: UseOfTimeEventData) => void
   ): void {
-    const listeners = this.eventListeners.get(eventType) || [];
-    listeners.push(callback);
-    this.eventListeners.set(eventType, listeners);
+    const listeners = this.eventListeners.get(eventType);
+    if (listeners) {
+      listeners.add(callback);
+    }
   }
 
   /**
@@ -356,14 +431,12 @@ export class UseOfTimeManager {
    * @param callback Callback function to remove
    */
   public removeEventListener(
-    eventType: UseOfTimeEventType, 
+    eventType: UseOfTimeEventType,
     callback: (data: UseOfTimeEventData) => void
   ): void {
-    const listeners = this.eventListeners.get(eventType) || [];
-    const index = listeners.indexOf(callback);
-    if (index !== -1) {
-      listeners.splice(index, 1);
-      this.eventListeners.set(eventType, listeners);
+    const listeners = this.eventListeners.get(eventType);
+    if (listeners) {
+      listeners.delete(callback);
     }
   }
 
@@ -373,10 +446,15 @@ export class UseOfTimeManager {
    * @param data Event data
    */
   private emitEvent(eventType: UseOfTimeEventType, data: UseOfTimeEventData): void {
-    const listeners = this.eventListeners.get(eventType) || [];
-    listeners.forEach(callback => {
+    const listeners = this.eventListeners.get(eventType);
+    if (!listeners || listeners.size === 0) return;
+
+    // Freeze data to prevent mutation by listeners
+    const frozenData = Object.freeze({ ...data });
+
+    listeners.forEach((callback) => {
       try {
-        callback(data);
+        callback(frozenData);
       } catch (error) {
         console.error(`Error in UseOfTimeManager event listener for ${eventType}:`, error);
       }
@@ -415,5 +493,13 @@ export class UseOfTimeManager {
    */
   public getCurrentAllocation(): WeeklyTimeAllocation {
     return { ...this.state.currentAllocation };
+  }
+
+  /**
+   * Clear all caches (for testing or when config changes)
+   */
+  public clearCaches(): void {
+    this.resourceImpactCache.clear();
+    this.skillCostCache.clear();
   }
 }

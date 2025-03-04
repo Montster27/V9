@@ -1,0 +1,111 @@
+/**
+ * /src/interface/components/news/NewsStream.css
+ * 
+ * Styles for the NewsStream component
+ */
+
+.news-stream {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  height: 400px;
+  width: 100%;
+  max-width: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.news-stream__header {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 12px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.news-stream__header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.news-stream__items {
+  padding: 8px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.news-stream__item {
+  background-color: white;
+  border-radius: 6px;
+  padding: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-left: 4px solid transparent;
+}
+
+.news-stream__item:hover {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.news-stream__item.unread {
+  border-left-color: var(--accent-color);
+}
+
+.news-stream__item.read {
+  opacity: 0.7;
+}
+
+.news-stream__item.category-campus {
+  border-left-color: var(--primary-color);
+}
+
+.news-stream__item.category-world {
+  border-left-color: var(--secondary-color);
+}
+
+.news-stream__item.category-personal {
+  border-left-color: var(--accent-color);
+}
+
+.news-stream__item.category-event {
+  border-left-color: #ffd700;
+  background-color: #fffae6;
+}
+
+.news-stream__item-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+  color: #666;
+}
+
+.news-stream__item-source {
+  font-weight: bold;
+}
+
+.news-stream__item-title {
+  font-size: 1rem;
+  margin: 4px 0;
+  color: var(--text-color);
+}
+
+.news-stream__item-content {
+  font-size: 0.9rem;
+  margin: 0;
+  color: #333;
+}
+
+.news-stream__empty {
+  padding: 24px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}

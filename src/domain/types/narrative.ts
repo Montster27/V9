@@ -1,4 +1,5 @@
 // Narrative and conspiracy related types
+import { NarrativeArc, Clue, TimelineBranch } from '../models/Narrative';
 
 export enum NarrativeType {
   MYSTERY = 'mystery',
@@ -13,37 +14,7 @@ export enum TriggerType {
   RANDOM = 'random',
   MYSTERY = 'mystery',
   CONSPIRACY = 'conspiracy',
-  NARRATIVE = 'narrative'
-}
-
-export interface Clue {
-  id: string;
-  name: string;
-  description: string;
-  narrativeType: NarrativeType;
-  conspiracyTier: number; // 1-5, indicates how deep in the conspiracy this clue is
-  discovered: boolean;
-  discoveryDate?: Date;
-  relatedClues: string[]; // IDs of related clues
-}
-
-export interface TimelineBranch {
-  id: string;
-  name: string;
-  description: string;
-  unlocked: boolean;
-  chosen: boolean;
-  requirements: {
-    clues: string[];
-    skills: Record<string, number>;
-    resources: Record<string, number>;
-  };
-  effects: Array<{
-    type: 'resource' | 'skill' | 'event' | 'narrative';
-    target: string;
-    value: number | string | boolean;
-  }>;
-  powerShifts: Record<string, number>; // How power dynamics change
+  NARRATIVE = 'narrative',
 }
 
 export interface MysteryEventTrigger {
@@ -53,6 +24,9 @@ export interface MysteryEventTrigger {
     requiredClues: string[];
     skillRequirements?: Record<string, number>;
   };
+  // Adding compatibility with EventTrigger interface
+  condition?: string;
+  value?: any;
 }
 
 export interface ConspiracyEventTrigger {
@@ -62,6 +36,9 @@ export interface ConspiracyEventTrigger {
     playerInfluence: number;
     discoveredEntities: string[];
   };
+  // Adding compatibility with EventTrigger interface
+  condition?: string;
+  value?: any;
 }
 
 export interface NarrativeProgress {

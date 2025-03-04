@@ -59,8 +59,12 @@ export interface EventEffect {
   value: number | string | boolean;
 }
 
+// Updated EventTrigger to support all trigger types including narrative ones
 export interface EventTrigger {
-  type: 'time' | 'resource' | 'skill' | 'random';
-  condition: string;
-  value: number | string | boolean;
+  type: 'time' | 'resource' | 'skill' | 'random' | 'mystery' | 'conspiracy' | 'narrative';
+  condition?: string;
+  value?: number | string | boolean;
+  // Allow any additional properties for extended trigger types
+  conditions?: Record<string, any>;
+  [key: string]: any;
 }

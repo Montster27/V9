@@ -1,0 +1,82 @@
+/**
+ * /src/interface/components/useOfTime/TimeDistributionView.css
+ * 
+ * Styles for the TimeDistributionView component
+ */
+
+.time-distribution-view {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+}
+
+.time-distribution-view h2 {
+  margin: 0 0 16px 0;
+  font-size: 1.5rem;
+  color: var(--text-color);
+}
+
+.time-distribution-view__bar-chart {
+  display: flex;
+  height: 24px;
+  background-color: #e9ecef;
+  margin-bottom: 16px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.time-distribution-view__bar {
+  height: 100%;
+  transition: width 0.5s ease-out;
+}
+
+.time-distribution-view__legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.time-distribution-view__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.time-distribution-view__color-box {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+}
+
+.time-distribution-view__legend-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+}
+
+.time-distribution-view__legend-label {
+  font-weight: bold;
+  color: var(--text-color);
+}
+
+.time-distribution-view__legend-value {
+  color: var(--text-secondary);
+}
+
+.time-distribution-view__total {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  text-align: right;
+  font-style: italic;
+}
+
+/* Responsive styles */
+@media (max-width: 480px) {
+  .time-distribution-view__legend {
+    grid-template-columns: 1fr;
+  }
+}

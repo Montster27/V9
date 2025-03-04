@@ -6,3 +6,4 @@
 
 export { default as TimeDisplay } from './TimeDisplay';
 export { default as TimeControls } from './TimeControls';
+export { default as TimeControlsEnhanced } from './TimeControlsEnhanced';

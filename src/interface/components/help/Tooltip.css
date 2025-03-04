@@ -1,0 +1,83 @@
+/**
+ * /src/interface/components/help/Tooltip.css
+ *
+ * Styles for the tooltip component
+ */
+
+.tooltip-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tooltip-icon {
+  margin-left: 4px;
+  font-size: 0.9em;
+  color: var(--accent-color);
+  cursor: help;
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 1000;
+  max-width: 250px;
+  background-color: var(--dark-bg);
+  color: white;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.95);
+  transform-origin: center;
+  animation: tooltip-appear 0.2s ease forwards;
+  white-space: normal;
+  text-align: left;
+  word-break: break-word;
+}
+
+.tooltip-arrow {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--dark-bg);
+  transform: rotate(45deg);
+}
+
+/* Tooltip positions */
+.tooltip-top .tooltip-arrow {
+  bottom: -4px;
+  left: 50%;
+  margin-left: -4px;
+}
+
+.tooltip-bottom .tooltip-arrow {
+  top: -4px;
+  left: 50%;
+  margin-left: -4px;
+}
+
+.tooltip-left .tooltip-arrow {
+  right: -4px;
+  top: 50%;
+  margin-top: -4px;
+}
+
+.tooltip-right .tooltip-arrow {
+  left: -4px;
+  top: 50%;
+  margin-top: -4px;
+}
+
+@keyframes tooltip-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

@@ -13,14 +13,14 @@ import { type Locator, expect } from '@playwright/test';
  */
 export async function waitForGameTime(page: any, seconds: number, speed = 1): Promise<void> {
   // Ensure the game is running (not paused)
-  const isPaused = await page.locator('.time-controls__pause-button.paused').isVisible();
+  const isPaused = await page.locator('.time-controls-enhanced__pause-button.paused').isVisible();
   if (isPaused) {
-    await page.locator('.time-controls__pause-button').click();
+    await page.locator('.time-controls-enhanced__pause-button').click();
   }
 
   // Set game speed if needed
   if (speed > 1) {
-    await page.locator(`.time-controls__speed-button:has-text("${speed}x")`).click();
+    await page.locator(`.time-controls-enhanced__speed-button:has-text("${speed}x")`).click();
   }
 
   // Wait for the specified amount of time
@@ -51,7 +51,7 @@ export async function setTimeAllocation(
 
   // Verify the value was set
   const valueElement = page.locator(
-    `.time-allocation-slider__label:has-text("${activityCapitalized}") >> xpath=../following-sibling::span[contains(@class, "value")]`
+    `.slider-label:has-text("${activityCapitalized}") >> xpath=../following-sibling::span[contains(@class, "slider-value")]`
   );
 
   // The value can take some time to update
@@ -102,13 +102,13 @@ export async function getResourceValue(page: any, resourceName: string): Promise
  * @returns Boolean indicating if the game is now paused
  */
 export async function togglePause(page: any): Promise<boolean> {
-  await page.locator('.time-controls__pause-button').click();
+  await page.locator('.time-controls-enhanced__pause-button').click();
 
   // Wait a moment for the state to update
   await page.waitForTimeout(100);
 
   // Check if the game is paused
-  return await page.locator('.time-controls__pause-button.paused').isVisible();
+  return await page.locator('.time-controls-enhanced__pause-button.paused').isVisible();
 }
 
 /**
@@ -117,12 +117,27 @@ export async function togglePause(page: any): Promise<boolean> {
  * @param speed Speed level (1, 2, or 5)
  */
 export async function setGameSpeed(page: any, speed: 1 | 2 | 5): Promise<void> {
-  await page.locator(`.time-controls__speed-button:has-text("${speed}x")`).click();
+  await page.locator(`.time-controls-enhanced__speed-button:has-text("${speed}x")`).click();
 
   // Verify the speed was set
   await expect(
-    page.locator(`.time-controls__speed-button:has-text("${speed}x").active`)
+    page.locator(`.time-controls-enhanced__speed-button:has-text("${speed}x").active`)
   ).toBeVisible();
+}
+
+/**
+ * Wait for a specific news event to appear
+ * @param page Playwright Page object
+ * @param textContent Text content to look for in the news item
+ * @param timeout Timeout in milliseconds (default: 30000ms)
+ */
+export async function waitForNewsEvent(
+  page: any,
+  textContent: string,
+  timeout = 30000
+): Promise<void> {
+  // Wait for a news item containing the specified text to appear
+  await expect(page.locator(`.news-item:has-text("${textContent}")`)).toBeVisible({ timeout });
 }
 
 /**
@@ -148,16 +163,16 @@ export async function getGameDateTime(page: any): Promise<{ date: string; time: 
 export async function resetTimeAllocations(page: any): Promise<void> {
   await page.locator('.time-allocation-sliders__reset-button').click();
 
-  // Verify default allocations are restored
+  // Verify default allocations are restored - update selectors for new UI
   await expect(
     page.locator(
-      '.time-allocation-slider__label:has-text("Rest") >> xpath=../following-sibling::span[contains(@class, "value")]'
+      '.slider-label:has-text("Rest") >> xpath=../following-sibling::span[contains(@class, "slider-value")]'
     )
   ).toContainText('8.0 hours/day');
 
   await expect(
     page.locator(
-      '.time-allocation-slider__label:has-text("Study") >> xpath=../following-sibling::span[contains(@class, "value")]'
+      '.slider-label:has-text("Study") >> xpath=../following-sibling::span[contains(@class, "slider-value")]'
     )
   ).toContainText('4.0 hours/day');
 }

@@ -1,12 +1,46 @@
-import { 
-  NarrativeType, 
-  Clue, 
-  TimelineBranch, 
+import {
+  NarrativeType,
   TriggerType,
   MysteryEventTrigger,
-  ConspiracyEventTrigger
+  ConspiracyEventTrigger,
 } from '../types/narrative';
 import { GameEvent, EventChoice, EventEffect } from '../types/index';
+
+/**
+ * Represents a clue in the narrative system
+ */
+export interface Clue {
+  id: string;
+  name: string;
+  description: string;
+  narrativeType: NarrativeType;
+  conspiracyTier: number; // 1-5, indicates how deep in the conspiracy this clue is
+  discovered: boolean;
+  discoveryDate?: Date;
+  relatedClues: string[]; // IDs of related clues
+}
+
+/**
+ * Represents a timeline branch that can alter game history
+ */
+export interface TimelineBranch {
+  id: string;
+  name: string;
+  description: string;
+  unlocked: boolean;
+  chosen: boolean;
+  requirements: {
+    clues: string[];
+    skills: Record<string, number>;
+    resources: Record<string, number>;
+  };
+  effects: Array<{
+    type: 'resource' | 'skill' | 'event' | 'narrative';
+    target: string;
+    value: number | string | boolean;
+  }>;
+  powerShifts: Record<string, number>; // How power dynamics change
+}
 
 /**
  * Represents a narrative arc in the game
@@ -30,10 +64,10 @@ export interface NarrativeArc {
  */
 export interface MysteryEvent extends GameEvent {
   trigger: MysteryEventTrigger;
-  revealedContent: string;     // New lore/conspiracy content revealed
-  futureBranches: string[];    // Future storylines this unlocks
+  revealedContent: string; // New lore/conspiracy content revealed
+  futureBranches: string[]; // Future storylines this unlocks
   characterResponses: Record<string, string>; // How NPCs react to discoveries
-  clueRewards: string[];      // Clues discovered through this event
+  clueRewards: string[]; // Clues discovered through this event
 }
 
 /**
@@ -41,8 +75,8 @@ export interface MysteryEvent extends GameEvent {
  */
 export interface ConspiracyEvent extends GameEvent {
   trigger: ConspiracyEventTrigger;
-  conspiracyTier: number;        // Depth of conspiracy revelation (1-5)
-  historicalDivergence: string;  // How this changes historical timeline
+  conspiracyTier: number; // Depth of conspiracy revelation (1-5)
+  historicalDivergence: string; // How this changes historical timeline
   powerShift: Record<string, number>; // How power dynamics change
   newNarrativeBranches: string[]; // New story paths unlocked
   timelineBranches: TimelineBranch[]; // Possible timeline alterations
@@ -76,10 +110,10 @@ export class NarrativeFactory {
       events,
       timelineBranches,
       active: true,
-      completed: false
+      completed: false,
     };
   }
-  
+
   /**
    * Create a new clue
    */
@@ -98,10 +132,10 @@ export class NarrativeFactory {
       narrativeType,
       conspiracyTier,
       discovered: false,
-      relatedClues
+      relatedClues,
     };
   }
-  
+
   /**
    * Create a new timeline branch
    */
@@ -125,10 +159,10 @@ export class NarrativeFactory {
       chosen: false,
       requirements,
       effects,
-      powerShifts
+      powerShifts,
     };
   }
-  
+
   /**
    * Create a new mystery event
    */
@@ -155,18 +189,21 @@ export class NarrativeFactory {
         conditions: {
           conspiracyLevel,
           requiredClues,
-          skillRequirements
-        }
+          skillRequirements,
+        },
+        // Add compatibility with base EventTrigger interface
+        condition: 'mystery',
+        value: conspiracyLevel,
       },
       revealedContent,
       futureBranches,
       characterResponses,
       clueRewards,
       isActive: false,
-      isResolved: false
+      isResolved: false,
     };
   }
-  
+
   /**
    * Create a new conspiracy event
    */
@@ -194,8 +231,11 @@ export class NarrativeFactory {
         conditions: {
           worldTimeline,
           playerInfluence,
-          discoveredEntities
-        }
+          discoveredEntities,
+        },
+        // Add compatibility with base EventTrigger interface
+        condition: 'conspiracy',
+        value: conspiracyTier,
       },
       conspiracyTier,
       historicalDivergence,
@@ -203,7 +243,7 @@ export class NarrativeFactory {
       newNarrativeBranches,
       timelineBranches,
       isActive: false,
-      isResolved: false
+      isResolved: false,
     };
   }
 }

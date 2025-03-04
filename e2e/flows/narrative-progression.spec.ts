@@ -14,18 +14,18 @@ test.describe('Narrative Progression', () => {
     await page.reload();
 
     // Count initial news items
-    const initialNewsItems = await page.locator('.news-stream .news-item').count();
+    const initialNewsItems = await page.locator('.news-item').count();
 
-    // Resume game at 3x speed
-    await setGameSpeed(page, 3);
+    // Resume game at 2x speed (changed from 3x to match allowed values)
+    await setGameSpeed(page, 2);
     await togglePause(page);
 
     // Wait for new news items to appear (news should update every 4 game hours)
-    // At 3x speed, 3 seconds = 3 game days = 72 hours, so we should get multiple updates
+    // At 2x speed, 3 seconds = 2 game days = 48 hours, so we should get multiple updates
     await page.waitForTimeout(3000);
 
     // Count news items after time has passed
-    const updatedNewsItems = await page.locator('.news-stream .news-item').count();
+    const updatedNewsItems = await page.locator('.news-item').count();
 
     // Should have more news items now
     expect(updatedNewsItems).toBeGreaterThan(initialNewsItems);
@@ -35,12 +35,10 @@ test.describe('Narrative Progression', () => {
     await page.goto('/');
 
     // Get initial narrative content
-    const initialNarrativeContent = await page
-      .locator('.narrative-panel .narrative-content')
-      .textContent();
+    const initialNarrativeContent = await page.locator('.narrative-text').textContent();
 
-    // Resume game at 3x speed
-    await setGameSpeed(page, 3);
+    // Resume game at 2x speed (changed from 3x to match allowed values)
+    await setGameSpeed(page, 2);
     await togglePause(page);
 
     // Wait for narrative to progress (this may require specific triggers)
@@ -51,9 +49,7 @@ test.describe('Narrative Progression', () => {
     await togglePause(page);
 
     // Get updated narrative content
-    const updatedNarrativeContent = await page
-      .locator('.narrative-panel .narrative-content')
-      .textContent();
+    const updatedNarrativeContent = await page.locator('.narrative-text').textContent();
 
     // The narrative content should have updated
     // Note: This test may be flaky if narrative doesn't actually update based on time alone
@@ -65,10 +61,10 @@ test.describe('Narrative Progression', () => {
     await page.goto('/');
 
     // Count initial clues
-    const initialClues = await page.locator('.narrative-panel .narrative-clue').count();
+    const initialClues = await page.locator('.narrative-clue').count();
 
-    // Resume game at 3x speed
-    await setGameSpeed(page, 3);
+    // Resume game at 2x speed (changed from 3x to match allowed values)
+    await setGameSpeed(page, 2);
     await togglePause(page);
 
     // Wait for clues to be discovered
@@ -79,7 +75,7 @@ test.describe('Narrative Progression', () => {
     await togglePause(page);
 
     // Count clues after time has passed
-    const updatedClues = await page.locator('.narrative-panel .narrative-clue').count();
+    const updatedClues = await page.locator('.narrative-clue').count();
 
     // Should have more clues now
     // Note: This test may be flaky if clues aren't discovered based on time alone
@@ -89,8 +85,8 @@ test.describe('Narrative Progression', () => {
   test('events pause the game when triggered', async ({ page }) => {
     await page.goto('/');
 
-    // Resume game at 3x speed
-    await setGameSpeed(page, 3);
+    // Resume game at 2x speed (changed from 3x to match allowed values)
+    await setGameSpeed(page, 2);
     await togglePause(page);
 
     // Wait for an event to be triggered
@@ -100,7 +96,7 @@ test.describe('Narrative Progression', () => {
 
     // If an event was triggered, the game should have paused
     // Check if the pause button is active
-    const isPaused = await page.locator('.time-controls .pause-button.active').isVisible();
+    const isPaused = await page.locator('.time-controls-enhanced__pause-button.paused').isVisible();
 
     // If an event happened, isPaused should be true
     // However, this test is inherently flaky since events may not trigger during our test window
@@ -116,14 +112,10 @@ test.describe('Narrative Progression', () => {
     await page.goto('/');
 
     // Change time allocation to have more study time
-    await page
-      .locator(
-        '.time-allocation-sliders .slider-container[data-activity="study"] input[type="range"]'
-      )
-      .fill('10');
+    await page.locator('.slider-container:has-text("Study") input[type="range"]').fill('10');
 
-    // Resume game at 3x speed
-    await setGameSpeed(page, 3);
+    // Resume game at 2x speed (changed from 3x to match allowed values)
+    await setGameSpeed(page, 2);
     await togglePause(page);
 
     // Wait for news related to study to appear
@@ -132,9 +124,9 @@ test.describe('Narrative Progression', () => {
 
     // Check if any news item mentions studying or academics
     const hasAcademicNews =
-      (await page.locator('.news-stream .news-item:has-text("study")').isVisible()) ||
-      (await page.locator('.news-stream .news-item:has-text("academic")').isVisible()) ||
-      (await page.locator('.news-stream .news-item:has-text("class")').isVisible());
+      (await page.locator('.news-item:has-text("study")').isVisible()) ||
+      (await page.locator('.news-item:has-text("academic")').isVisible()) ||
+      (await page.locator('.news-item:has-text("class")').isVisible());
 
     // This is another potentially flaky test since we can't guarantee specific news events
     // will trigger within our test timeframe

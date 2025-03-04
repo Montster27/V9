@@ -1,11 +1,14 @@
 /**
  * /src/interface/components/time/TimeDisplay.test.tsx
  *
- * Tests for TimeDisplay component
- *
- * Note: Tests are currently disabled due to TypeScript configuration issues
- * These will be implemented in a separate PR
+ * Tests for TimeDisplay component - DISABLED
  */
 
-// Placeholder test file
-// Tests will be implemented after fixing the testing configuration
+// Skip this test file until testing configuration is fixed
+describe.skip('TimeDisplay', () => {
+  it('skipped test', () => {
+    // This test is intentionally skipped
+  });
+});
+
+export {};

@@ -2,6 +2,7 @@
  * Unit tests for the Skill model
  */
 
+import { describe, it, expect, beforeEach } from 'vitest';
 import {
   LifePathThread,
   SkillNode,
@@ -12,7 +13,7 @@ import {
   SkillPointsCalculator,
   SkillRequirementChecker,
   SkillRegistry,
-  SkillManager
+  SkillManager,
 } from '../../../../domain/models/Skill';
 
 describe('Skill System', () => {
@@ -76,9 +77,9 @@ describe('Skill System', () => {
 
     it('should apply combined modifiers correctly', () => {
       const calculator = new SkillPointsCalculator();
-      const points = calculator.calculateSkillPoints(24, 1, { 
-        activityBonus: 10, 
-        skillSynergy: 1.5 
+      const points = calculator.calculateSkillPoints(24, 1, {
+        activityBonus: 10,
+        skillSynergy: 1.5,
       });
       expect(points).toBe(46); // (24 hours * 1 point * 1.5 multiplier) + 10 bonus
     });
@@ -95,9 +96,9 @@ describe('Skill System', () => {
         tier: 1,
         baseCost: 10,
         requires: [],
-        effects: []
+        effects: [],
       };
-      
+
       const result = checker.canAcquireSkill(skill, []);
       expect(result).toBe(true);
     });
@@ -112,16 +113,16 @@ describe('Skill System', () => {
         tier: 2,
         baseCost: 20,
         requires: ['test.basic'],
-        effects: []
+        effects: [],
       };
-      
+
       // Without prerequisite
       let result = checker.canAcquireSkill(skill, []);
       expect(result).toBe(false);
-      
+
       // With prerequisite
       result = checker.canAcquireSkill(skill, [
-        { skillId: 'test.basic', acquiredAt: 123, level: 1 }
+        { skillId: 'test.basic', acquiredAt: 123, level: 1 },
       ]);
       expect(result).toBe(true);
     });
@@ -136,15 +137,15 @@ describe('Skill System', () => {
     it('should filter skills by thread', () => {
       const bodySkills = SkillRegistry.getSkillsByThread(LifePathThread.BODY);
       const mindSkills = SkillRegistry.getSkillsByThread(LifePathThread.MIND);
-      
+
       expect(bodySkills.length).toBeGreaterThan(0);
       expect(mindSkills.length).toBeGreaterThan(0);
-      
-      bodySkills.forEach(skill => {
+
+      bodySkills.forEach((skill) => {
         expect(skill.thread).toBe(LifePathThread.BODY);
       });
-      
-      mindSkills.forEach(skill => {
+
+      mindSkills.forEach((skill) => {
         expect(skill.thread).toBe(LifePathThread.MIND);
       });
     });
@@ -160,20 +161,20 @@ describe('Skill System', () => {
   describe('SkillManager', () => {
     let manager: SkillManager;
     let initialState: SkillState;
-    
+
     beforeEach(() => {
       manager = new SkillManager();
       initialState = {
         acquiredSkills: [],
         skillPoints: 100,
         totalPointsEarned: 100,
-        lastUpdate: Date.now()
+        lastUpdate: Date.now(),
       };
     });
-    
+
     it('should acquire a skill when requirements are met', () => {
       const result = manager.acquireSkill('body.stamina', initialState);
-      
+
       expect(result).not.toBeNull();
       if (result) {
         expect(result.acquiredSkills.length).toBe(1);
@@ -181,74 +182,68 @@ describe('Skill System', () => {
         expect(result.skillPoints).toBe(90); // 100 - 10 (cost of body.stamina)
       }
     });
-    
+
     it('should not acquire a skill when requirements are not met', () => {
       // Attempt to acquire a tier 2 skill without prerequisites
       const result = manager.acquireSkill('body.athleticism', initialState);
-      
+
       expect(result).toBeNull();
     });
-    
+
     it('should not acquire a skill if already owned', () => {
       const stateWithSkill: SkillState = {
         ...initialState,
-        acquiredSkills: [
-          { skillId: 'body.stamina', acquiredAt: 123, level: 1 }
-        ]
+        acquiredSkills: [{ skillId: 'body.stamina', acquiredAt: 123, level: 1 }],
       };
-      
+
       const result = manager.acquireSkill('body.stamina', stateWithSkill);
       expect(result).toBeNull();
     });
-    
+
     it('should not acquire a skill without enough points', () => {
       const poorState: SkillState = {
         ...initialState,
-        skillPoints: 5 // Not enough for any skill
+        skillPoints: 5, // Not enough for any skill
       };
-      
+
       const result = manager.acquireSkill('body.stamina', poorState);
       expect(result).toBeNull();
     });
-    
+
     it('should generate skill points based on elapsed time', () => {
       const result = manager.generateSkillPoints(24, initialState);
-      
+
       expect(result.skillPoints).toBe(124); // 100 + 24 hours
       expect(result.totalPointsEarned).toBe(124); // 100 + 24
     });
-    
+
     it('should calculate available skills correctly', () => {
       // With no skills, all tier 1 skills should be available
       let available = manager.getAvailableSkills(initialState);
-      const tier1Count = SkillRegistry.getAllSkills().filter(s => s.tier === 1).length;
+      const tier1Count = SkillRegistry.getAllSkills().filter((s) => s.tier === 1).length;
       expect(available.length).toBe(tier1Count);
-      
+
       // With a tier 1 skill, its tier 2 descendant should become available
       const stateWithStamina: SkillState = {
         ...initialState,
-        acquiredSkills: [
-          { skillId: 'body.stamina', acquiredAt: 123, level: 1 }
-        ]
+        acquiredSkills: [{ skillId: 'body.stamina', acquiredAt: 123, level: 1 }],
       };
-      
+
       available = manager.getAvailableSkills(stateWithStamina);
       // Should include body.athleticism now
-      const athleticismAvailable = available.some(s => s.id === 'body.athleticism');
+      const athleticismAvailable = available.some((s) => s.id === 'body.athleticism');
       expect(athleticismAvailable).toBe(true);
     });
-    
+
     it('should calculate skill effects correctly', () => {
       // With stamina skill which adds energy.max and multiplies energy.regen
       const stateWithStamina: SkillState = {
         ...initialState,
-        acquiredSkills: [
-          { skillId: 'body.stamina', acquiredAt: 123, level: 1 }
-        ]
+        acquiredSkills: [{ skillId: 'body.stamina', acquiredAt: 123, level: 1 }],
       };
-      
+
       const effects = manager.calculateSkillEffects(stateWithStamina);
-      
+
       // Should have energy.max += 10 and energy.regen *= 1.1
       expect(effects['energy.max']).toBe(10);
       expect(effects['energy.regen']).toBe(1.1);

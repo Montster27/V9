@@ -9,6 +9,7 @@ import {
   setGameSpeed,
   getGameDateTime,
   waitForGameTime,
+  getResourceValue,
 } from '../helpers/test-helpers';
 
 test.describe('Skill Point Generation', () => {
@@ -16,40 +17,28 @@ test.describe('Skill Point Generation', () => {
     await page.goto('/');
 
     // Get initial skill points
-    const initialSkillPoints = await page
-      .locator(
-        '.resource-statistics .resource-item:has(.resource-label:text-is("Skill Points:")) .resource-value'
-      )
-      .textContent();
-    const initialPoints = initialSkillPoints
-      ? parseInt(initialSkillPoints.replace(/[^0-9]/g, ''))
-      : 0;
+    const initialPoints = await getResourceValue(page, 'skillPoints');
 
     // Resume the game
     await togglePause(page);
 
-    // Set speed to 3x for faster testing
-    await setGameSpeed(page, 3);
+    // Set speed to 2x for faster testing (changed from 3x to match allowed values)
+    await setGameSpeed(page, 2);
 
-    // Wait 3 seconds (at 3x speed, this is 3 game days = 72 hours = 72 skill points)
+    // Wait 3 seconds (at 2x speed, this is 2 game days = 48 hours = 48 skill points)
     await page.waitForTimeout(3000);
 
     // Get new skill point value
-    const newSkillPoints = await page
-      .locator(
-        '.resource-statistics .resource-item:has(.resource-label:text-is("Skill Points:")) .resource-value'
-      )
-      .textContent();
-    const newPoints = newSkillPoints ? parseInt(newSkillPoints.replace(/[^0-9]/g, '')) : 0;
+    const newPoints = await getResourceValue(page, 'skillPoints');
 
-    // Should have gained skill points (approximately 72, but may vary slightly due to timing)
+    // Should have gained skill points (approximately 48, but may vary slightly due to timing)
     expect(newPoints).toBeGreaterThan(initialPoints);
 
-    // We expect around 72 points (24 hours * 3 days)
+    // We expect around 48 points (24 hours * 2 days)
     // Allow for some variation due to timing, but should be close
     const pointsGained = newPoints - initialPoints;
-    expect(pointsGained).toBeGreaterThanOrEqual(65); // Lower bound allowing for timing variations
-    expect(pointsGained).toBeLessThanOrEqual(80); // Upper bound allowing for timing variations
+    expect(pointsGained).toBeGreaterThanOrEqual(42); // Lower bound allowing for timing variations
+    expect(pointsGained).toBeLessThanOrEqual(54); // Upper bound allowing for timing variations
   });
 
   test('pausing stops skill point generation', async ({ page }) => {
@@ -65,27 +54,13 @@ test.describe('Skill Point Generation', () => {
     await togglePause(page);
 
     // Get skill points after pausing
-    const skillPointsAfterPause = await page
-      .locator(
-        '.resource-statistics .resource-item:has(.resource-label:text-is("Skill Points:")) .resource-value'
-      )
-      .textContent();
-    const pointsAfterPause = skillPointsAfterPause
-      ? parseInt(skillPointsAfterPause.replace(/[^0-9]/g, ''))
-      : 0;
+    const pointsAfterPause = await getResourceValue(page, 'skillPoints');
 
     // Wait 3 seconds while paused
     await page.waitForTimeout(3000);
 
     // Get skill points after waiting
-    const skillPointsAfterWait = await page
-      .locator(
-        '.resource-statistics .resource-item:has(.resource-label:text-is("Skill Points:")) .resource-value'
-      )
-      .textContent();
-    const pointsAfterWait = skillPointsAfterWait
-      ? parseInt(skillPointsAfterWait.replace(/[^0-9]/g, ''))
-      : 0;
+    const pointsAfterWait = await getResourceValue(page, 'skillPoints');
 
     // Skill points should not have changed while paused
     expect(pointsAfterWait).toBe(pointsAfterPause);
@@ -104,14 +79,7 @@ test.describe('Skill Point Generation', () => {
     await togglePause(page);
 
     // Get skill points after pausing
-    const skillPointsAfterPause = await page
-      .locator(
-        '.resource-statistics .resource-item:has(.resource-label:text-is("Skill Points:")) .resource-value'
-      )
-      .textContent();
-    const pointsAfterPause = skillPointsAfterPause
-      ? parseInt(skillPointsAfterPause.replace(/[^0-9]/g, ''))
-      : 0;
+    const pointsAfterPause = await getResourceValue(page, 'skillPoints');
 
     // Resume the game
     await togglePause(page);
@@ -120,14 +88,7 @@ test.describe('Skill Point Generation', () => {
     await page.waitForTimeout(2000);
 
     // Get skill points after resuming
-    const skillPointsAfterResume = await page
-      .locator(
-        '.resource-statistics .resource-item:has(.resource-label:text-is("Skill Points:")) .resource-value'
-      )
-      .textContent();
-    const pointsAfterResume = skillPointsAfterResume
-      ? parseInt(skillPointsAfterResume.replace(/[^0-9]/g, ''))
-      : 0;
+    const pointsAfterResume = await getResourceValue(page, 'skillPoints');
 
     // Skill points should have increased after resuming
     expect(pointsAfterResume).toBeGreaterThan(pointsAfterPause);
@@ -140,17 +101,10 @@ test.describe('Skill Point Generation', () => {
     await page.reload();
 
     // Ensure game is paused at start
-    await expect(page.locator('.time-controls .pause-button.active')).toBeVisible();
+    await expect(page.locator('.time-controls-enhanced__pause-button.paused')).toBeVisible();
 
     // Get initial skill points
-    const initialSkillPoints = await page
-      .locator(
-        '.resource-statistics .resource-item:has(.resource-label:text-is("Skill Points:")) .resource-value'
-      )
-      .textContent();
-    const initialPoints = initialSkillPoints
-      ? parseInt(initialSkillPoints.replace(/[^0-9]/g, ''))
-      : 0;
+    const initialPoints = await getResourceValue(page, 'skillPoints');
 
     // Set to 1x speed and run for 3 seconds
     await setGameSpeed(page, 1);
@@ -159,49 +113,32 @@ test.describe('Skill Point Generation', () => {
     await togglePause(page);
 
     // Get skill points at 1x speed
-    const points1x = await page
-      .locator(
-        '.resource-statistics .resource-item:has(.resource-label:text-is("Skill Points:")) .resource-value'
-      )
-      .textContent();
-    const points1xValue = points1x ? parseInt(points1x.replace(/[^0-9]/g, '')) : 0;
+    const points1xValue = await getResourceValue(page, 'skillPoints');
     const gained1x = points1xValue - initialPoints;
 
     // Reset game
     await page.reload();
 
     // Ensure game is paused at start
-    await expect(page.locator('.time-controls .pause-button.active')).toBeVisible();
+    await expect(page.locator('.time-controls-enhanced__pause-button.paused')).toBeVisible();
 
     // Get initial skill points
-    const initialSkillPoints2 = await page
-      .locator(
-        '.resource-statistics .resource-item:has(.resource-label:text-is("Skill Points:")) .resource-value'
-      )
-      .textContent();
-    const initialPoints2 = initialSkillPoints2
-      ? parseInt(initialSkillPoints2.replace(/[^0-9]/g, ''))
-      : 0;
+    const initialPoints2 = await getResourceValue(page, 'skillPoints');
 
-    // Set to 3x speed and run for 3 seconds
-    await setGameSpeed(page, 3);
+    // Set to 2x speed and run for 3 seconds (changed from 3x to match allowed values)
+    await setGameSpeed(page, 2);
     await togglePause(page);
     await page.waitForTimeout(3000);
     await togglePause(page);
 
-    // Get skill points at 3x speed
-    const points3x = await page
-      .locator(
-        '.resource-statistics .resource-item:has(.resource-label:text-is("Skill Points:")) .resource-value'
-      )
-      .textContent();
-    const points3xValue = points3x ? parseInt(points3x.replace(/[^0-9]/g, '')) : 0;
-    const gained3x = points3xValue - initialPoints2;
+    // Get skill points at 2x speed
+    const points2xValue = await getResourceValue(page, 'skillPoints');
+    const gained2x = points2xValue - initialPoints2;
 
-    // At 3x speed, should gain approximately 3 times as many points
+    // At 2x speed, should gain approximately 2 times as many points
     // Allow some margin for timing variations
-    const ratio = gained3x / Math.max(1, gained1x); // Avoid division by zero
-    expect(ratio).toBeGreaterThanOrEqual(2.5);
-    expect(ratio).toBeLessThanOrEqual(3.5);
+    const ratio = gained2x / Math.max(1, gained1x); // Avoid division by zero
+    expect(ratio).toBeGreaterThanOrEqual(1.7);
+    expect(ratio).toBeLessThanOrEqual(2.3);
   });
 });

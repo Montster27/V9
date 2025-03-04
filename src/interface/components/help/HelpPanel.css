@@ -1,0 +1,70 @@
+/**
+ * /src/interface/components/help/HelpPanel.css
+ *
+ * Styles for the help panel component
+ */
+
+.help-panel {
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: white;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.help-panel.is-open {
+  box-shadow: var(--shadow);
+}
+
+.help-panel-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background-color: var(--light-bg);
+  padding: 10px 15px;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--primary-color);
+  transition: background-color 0.2s ease;
+}
+
+.help-panel-header:hover {
+  background-color: rgba(52, 152, 219, 0.1);
+}
+
+.help-panel-icon {
+  margin-right: 8px;
+  font-size: 1.1em;
+  color: var(--accent-color);
+}
+
+.help-panel-title {
+  flex: 1;
+}
+
+.help-panel-toggle {
+  font-size: 0.8em;
+  color: var(--text-light);
+}
+
+.help-panel-content {
+  padding: 0;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.help-panel.is-open .help-panel-content {
+  padding: 15px;
+  max-height: 500px; /* Adjust as needed */
+  opacity: 1;
+}
+
+/* Animations */
+.help-panel-header:active {
+  transform: scale(0.99);
+}

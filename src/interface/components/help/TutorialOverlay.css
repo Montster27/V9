@@ -1,0 +1,134 @@
+/**
+ * /src/interface/components/help/TutorialOverlay.css
+ *
+ * Styles for the tutorial overlay component
+ */
+
+.tutorial-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.tutorial-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+}
+
+.tutorial-highlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.tutorial-target-highlight {
+  position: absolute;
+  box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.7);
+  border-radius: 4px;
+  z-index: 1001;
+}
+
+.tutorial-tooltip {
+  position: absolute;
+  z-index: 1002;
+  transform: translateX(-50%);
+  background-color: white;
+  border-radius: 8px;
+  padding: 16px;
+  width: 300px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  pointer-events: auto;
+  animation: tooltip-appear 0.3s ease;
+}
+
+.tutorial-tooltip-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  color: var(--primary-color);
+}
+
+.tutorial-tooltip-content {
+  margin-bottom: 16px;
+  line-height: 1.5;
+  color: var(--text-color);
+}
+
+.tutorial-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tutorial-step-counter {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  text-align: center;
+}
+
+.tutorial-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.tutorial-button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tutorial-button.next {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+}
+
+.tutorial-button.next:hover {
+  background-color: #2980b9;
+}
+
+.tutorial-button.previous {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+}
+
+.tutorial-button.previous:hover {
+  background-color: var(--light-bg);
+}
+
+.tutorial-button.skip {
+  background-color: transparent;
+  border: none;
+  color: var(--text-light);
+}
+
+.tutorial-button.skip:hover {
+  color: var(--text-color);
+}
+
+@keyframes tooltip-appear {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) translateX(-50%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) translateX(-50%);
+  }
+}

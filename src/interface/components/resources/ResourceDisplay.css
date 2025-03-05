@@ -1,0 +1,152 @@
+/**
+ * /src/interface/components/resources/ResourceDisplay.css
+ *
+ * Styles for the enhanced resource display component
+ */
+
+.resource-display {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.resource-display-title {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: var(--primary-color);
+}
+
+.resource-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.resource {
+  display: block;
+  transition: all 0.2s ease;
+}
+
+.resource:hover {
+  transform: translateY(-2px);
+}
+
+.resource-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.resource-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.resource-label {
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.resource-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+}
+
+.resource-trend-icon {
+  margin-left: 5px;
+  font-size: 0.9em;
+}
+
+.resource-bar {
+  height: 8px;
+  background-color: var(--light-bg);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.resource-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease-out;
+}
+
+/* Resource styles */
+.resource-default {
+  color: var(--text-color);
+}
+
+.resource-default.resource-bar-fill {
+  background-color: var(--accent-color);
+}
+
+.resource-success {
+  color: var(--success-color);
+}
+
+.resource-success.resource-bar-fill {
+  background-color: var(--success-color);
+}
+
+.resource-warning {
+  color: #f39c12;
+}
+
+.resource-warning.resource-bar-fill {
+  background-color: #f39c12;
+}
+
+.resource-danger {
+  color: var(--warning-color);
+}
+
+.resource-danger.resource-bar-fill {
+  background-color: var(--warning-color);
+}
+
+/* Value change animation */
+@keyframes value-change {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.resource-value-change {
+  animation: value-change 0.3s ease-in-out;
+}
+
+/* Tooltip styles */
+.resource-tooltip {
+  max-width: 250px;
+}
+
+.resource-tooltip-description {
+  margin: 0 0 8px 0;
+}
+
+.resource-tooltip-trend {
+  margin: 0;
+  font-size: 0.9em;
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 768px) {
+  .resource-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .resource-grid {
+    grid-template-columns: 1fr;
+  }
+}

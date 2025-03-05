@@ -1,9 +1,8 @@
 #!/bin/bash
-# make_scripts_executable.sh - Make all shell scripts executable
 
-echo "Making shell scripts executable..."
+# Make scripts executable
+chmod +x create_ui_data_integration_branch.sh
+chmod +x run_ui_data_integration_checks.sh
+chmod +x commit_ui_data_integration.sh
 
-# Make the scripts executable
-find . -name "*.sh" -type f -exec chmod +x {} \;
-
-echo "All scripts are now executable."
+echo "All scripts made executable!"

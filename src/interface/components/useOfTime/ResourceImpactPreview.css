@@ -1,0 +1,117 @@
+/**
+ * /src/interface/components/useOfTime/ResourceImpactPreview.css
+ * 
+ * Styles for the ResourceImpactPreview component
+ */
+
+.resource-impact-preview {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+}
+
+.resource-impact-preview h2 {
+  margin: 0 0 16px 0;
+  font-size: 1.5rem;
+  color: var(--text-color);
+}
+
+.resource-impact-preview__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.resource-impact-preview__item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.resource-impact-preview__label {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: var(--text-color);
+}
+
+.resource-impact-preview__value {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.resource-impact-preview__value.positive {
+  color: #34A853; /* Green */
+}
+
+.resource-impact-preview__value.negative {
+  color: #EA4335; /* Red */
+}
+
+.resource-impact-preview__value.neutral {
+  color: #9AA0A6; /* Gray */
+}
+
+.resource-impact-preview__penalties {
+  background-color: rgba(234, 67, 53, 0.1); /* Light red */
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 16px;
+  border-left: 4px solid #EA4335; /* Red */
+}
+
+.resource-impact-preview__penalties-label {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: var(--text-color);
+  margin-bottom: 4px;
+}
+
+.resource-impact-preview__penalties-value {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.resource-impact-preview__penalties-explanation {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.resource-impact-preview__total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.resource-impact-preview__total-label {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: var(--text-color);
+}
+
+.resource-impact-preview__total-value {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.resource-impact-preview__note {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  text-align: center;
+}
+
+/* Responsive styles */
+@media (max-width: 480px) {
+  .resource-impact-preview__grid {
+    grid-template-columns: 1fr;
+  }
+}

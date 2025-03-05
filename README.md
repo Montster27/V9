@@ -32,9 +32,22 @@ This project follows Clean Architecture principles:
 ## Key Features
 
 1. **Resource Management**: Track and manage energy, knowledge, money, social, and stress
-2. **Time System**: Advance time based on activities
-3. **Activity System**: Perform various activities to affect resources
-4. **Event System**: Encounter events based on your choices and state
+2. **Time System**: Advance time based on activities (3 real seconds = 1 game day)
+3. **Use_of_Time System**: Distribute time between different activities using sliders
+4. **Skill System**: Progress through five Life Path Threads with tiered skills
+5. **Event System**: Encounter events based on your choices and state
+
+## Skill System
+
+The game features an Adaptive Growth Web skill system with five Life Path Threads:
+
+- **Body**: Physical stamina, health, fitness
+- **Mind**: Critical thinking, problem-solving, memory  
+- **Heart**: Social awareness, persuasion, leadership
+- **World**: Resource management, finance, sustainability
+- **Mastery**: Specialized expertise, entrepreneurship
+
+Skills are arranged in three tiers with increasing costs and power. Players earn skill points continuously (1 per game hour) and can spend them to unlock skills that provide permanent bonuses.
 
 ## Testing
 
@@ -52,6 +65,7 @@ src/
 ├── domain/              # Core business logic
 │   ├── entities/        # Business objects
 │   ├── valueObjects/    # Immutable objects
+│   ├── models/          # Domain models (UseOfTime, Skill, etc.)
 │   ├── services/        # Domain services
 │   └── types/           # TypeScript type definitions
 ├── application/         # Use cases and application logic

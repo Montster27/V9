@@ -1,0 +1,144 @@
+/**
+ * /e2e/flows/skill-point-generation.spec.ts
+ *
+ * Tests for skill point generation
+ */
+import { test, expect } from '@playwright/test';
+import {
+  togglePause,
+  setGameSpeed,
+  getGameDateTime,
+  waitForGameTime,
+  getResourceValue
+} from '../helpers/test-helpers';
+
+test.describe('Skill Point Generation', () => {
+  test('generates skill points at rate of 1 per game hour', async ({ page }) => {
+    await page.goto('/');
+
+    // Get initial skill points
+    const initialPoints = await getResourceValue(page, 'skillPoints');
+
+    // Resume the game
+    await togglePause(page);
+
+    // Set speed to 2x for faster testing (changed from 3x to match allowed values)
+    await setGameSpeed(page, 2);
+
+    // Wait 3 seconds (at 2x speed, this is 2 game days = 48 hours = 48 skill points)
+    await page.waitForTimeout(3000);
+
+    // Get new skill point value
+    const newPoints = await getResourceValue(page, 'skillPoints');
+
+    // Should have gained skill points (approximately 48, but may vary slightly due to timing)
+    expect(newPoints).toBeGreaterThan(initialPoints);
+
+    // We expect around 48 points (24 hours * 2 days)
+    // Allow for some variation due to timing, but should be close
+    const pointsGained = newPoints - initialPoints;
+    expect(pointsGained).toBeGreaterThanOrEqual(42); // Lower bound allowing for timing variations
+    expect(pointsGained).toBeLessThanOrEqual(54); // Upper bound allowing for timing variations
+  });
+
+  test('pausing stops skill point generation', async ({ page }) => {
+    await page.goto('/');
+
+    // Resume the game
+    await togglePause(page);
+
+    // Let it run for a bit to generate some skill points
+    await page.waitForTimeout(1000);
+
+    // Pause the game
+    await togglePause(page);
+
+    // Get skill points after pausing
+    const pointsAfterPause = await getResourceValue(page, 'skillPoints');
+
+    // Wait 3 seconds while paused
+    await page.waitForTimeout(3000);
+
+    // Get skill points after waiting
+    const pointsAfterWait = await getResourceValue(page, 'skillPoints');
+
+    // Skill points should not have changed while paused
+    expect(pointsAfterWait).toBe(pointsAfterPause);
+  });
+
+  test('resuming continues skill point generation', async ({ page }) => {
+    await page.goto('/');
+
+    // Resume the game
+    await togglePause(page);
+
+    // Let it run for a bit to generate some skill points
+    await page.waitForTimeout(1000);
+
+    // Pause the game
+    await togglePause(page);
+
+    // Get skill points after pausing
+    const pointsAfterPause = await getResourceValue(page, 'skillPoints');
+
+    // Resume the game
+    await togglePause(page);
+
+    // Wait 2 seconds
+    await page.waitForTimeout(2000);
+
+    // Get skill points after resuming
+    const pointsAfterResume = await getResourceValue(page, 'skillPoints');
+
+    // Skill points should have increased after resuming
+    expect(pointsAfterResume).toBeGreaterThan(pointsAfterPause);
+  });
+
+  test('skill points are generated proportional to game speed', async ({ page }) => {
+    await page.goto('/');
+
+    // Reset to starting state
+    await page.reload();
+
+    // Ensure game is paused at start
+    await expect(page.locator('.time-controls-enhanced__pause-button.paused')).toBeVisible();
+
+    // Get initial skill points
+    const initialPoints = await getResourceValue(page, 'skillPoints');
+
+    // Set to 1x speed and run for 3 seconds
+    await setGameSpeed(page, 1);
+    await togglePause(page);
+    await page.waitForTimeout(3000);
+    await togglePause(page);
+
+    // Get skill points at 1x speed
+    const points1xValue = await getResourceValue(page, 'skillPoints');
+    const gained1x = points1xValue - initialPoints;
+
+    // Reset game
+    await page.reload();
+
+    // Ensure game is paused at start
+    await expect(page.locator('.time-controls-enhanced__pause-button.paused')).toBeVisible();
+
+    // Get initial skill points
+    const initialPoints2 = await getResourceValue(page, 'skillPoints');
+
+    // Set to 2x speed and run for 3 seconds (changed from 3x to match allowed values)
+    await setGameSpeed(page, 2);
+    await togglePause(page);
+    await page.waitForTimeout(3000);
+    await togglePause(page);
+
+    // Get skill points at 2x speed
+    const points2xValue = await getResourceValue(page, 'skillPoints');
+    const gained2x = points2xValue - initialPoints2;
+
+    // At 2x speed, should gain approximately 2 times as many points
+    // Allow some margin for timing variations
+    const ratio = gained2x / Math.max(1, gained1x); // Avoid division by zero
+    expect(ratio).toBeGreaterThanOrEqual(1.7);
+    expect(ratio).toBeLessThanOrEqual(2.3);
+  });
+});

@@ -1,10 +1,8 @@
 #!/bin/bash
-cd /Users/montysharma/Documents/v9/MMV09
 
-# Make the UI enhancement scripts executable
-chmod +x apply_mockup_design.sh
-chmod +x commit_ui_usability_enhancements.sh
+# Make scripts executable
+chmod +x create_ui_data_integration_branch.sh
+chmod +x run_ui_data_integration_checks.sh
+chmod +x commit_ui_data_integration.sh
 
-echo "Scripts are now executable. You can run:"
-echo "  ./apply_mockup_design.sh to apply the UI changes"
-echo "  ./commit_ui_usability_enhancements.sh to commit the changes"
+echo "All scripts made executable!"

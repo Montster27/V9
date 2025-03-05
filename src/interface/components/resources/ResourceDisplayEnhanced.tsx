@@ -44,9 +44,13 @@ const THRESHOLD_LEVELS = {
   },
 };
 
-interface ResourceTrend {
-  direction: 'up' | 'down' | 'stable';
-  rate: 'slow' | 'moderate' | 'fast';
+// Create consistent types for resource trends
+export type TrendDirection = 'up' | 'down' | 'stable';
+export type TrendRate = 'slow' | 'moderate' | 'fast';
+
+export interface ResourceTrend {
+  direction: TrendDirection;
+  rate: TrendRate;
 }
 
 export interface ResourceProps {
@@ -73,6 +77,40 @@ export interface ResourceProps {
   /** Animation enabled */
   animationEnabled?: boolean;
 }
+
+/**
+ * Type-safe mapper for converting Redux state trends to component props
+ * @param trend The trend from Redux state ('increasing', 'decreasing', 'stable')
+ * @param rate The rate from Redux state ('slow', 'moderate', 'fast')
+ * @returns A ResourceTrend object for the component
+ */
+export const mapTrendToResourceTrend = (
+  trend?: 'increasing' | 'decreasing' | 'stable',
+  rate?: 'slow' | 'moderate' | 'fast'
+): ResourceTrend | undefined => {
+  if (!trend) return undefined;
+
+  // Map the direction
+  let direction: TrendDirection;
+  switch (trend) {
+    case 'increasing':
+      direction = 'up';
+      break;
+    case 'decreasing':
+      direction = 'down';
+      break;
+    default:
+      direction = 'stable';
+  }
+
+  // Use the provided rate or default to 'moderate'
+  const trendRate: TrendRate = (rate as TrendRate) || 'moderate';
+
+  return {
+    direction,
+    rate: trendRate,
+  };
+};
 
 /**
  * Resource component displays a single resource with visual feedback
@@ -261,39 +299,29 @@ const ResourceDisplayConnected: React.FC<{
   const social = useAppSelector(selectSocial);
   const skillPoints = useAppSelector(selectSkillPoints);
 
-  // Convert Redux state trends to component props
-  const mapTrend = useCallback(
-    (
-      trend?: 'increasing' | 'decreasing' | 'stable',
-      rate?: 'slow' | 'moderate' | 'fast'
-    ): ResourceTrend | undefined => {
-      if (!trend) return undefined;
-
-      return {
-        direction: trend === 'increasing' ? 'up' : trend === 'decreasing' ? 'down' : 'stable',
-        rate: rate || 'moderate',
-      };
-    },
-    []
-  );
-
   // Memoize the trend mappings to prevent unnecessary rerenders
   const energyTrend = useMemo(
-    () => mapTrend(energy.trend, energy.rate),
-    [energy.trend, energy.rate, mapTrend]
+    () => mapTrendToResourceTrend(energy.trend, energy.rate),
+    [energy.trend, energy.rate]
   );
+
   const stressTrend = useMemo(
-    () => mapTrend(stress.trend, stress.rate),
-    [stress.trend, stress.rate, mapTrend]
+    () => mapTrendToResourceTrend(stress.trend, stress.rate),
+    [stress.trend, stress.rate]
   );
+
   const healthTrend = useMemo(
-    () => mapTrend(health.trend, health.rate),
-    [health.trend, health.rate, mapTrend]
+    () => mapTrendToResourceTrend(health.trend, health.rate),
+    [health.trend, health.rate]
   );
+
   const belongingTrend = useMemo(
-    () => mapTrend(belonging.trend, belonging.rate),
-    [belonging.trend, belonging.rate, mapTrend]
+    () => mapTrendToResourceTrend(belonging.trend, belonging.rate),
+    [belonging.trend, belonging.rate]
   );
+
+  // We don't have trend information for numerical resources
+  // so we'll leave those undefined
 
   return (
     <div className={`resource-display ${className}`}>

@@ -16,7 +16,8 @@ git add \
   src/interface/components/time/index.ts \
   src/interface/components/news/index.ts \
   run_ui_data_integration_checks.sh \
-  commit_ui_data_integration_focused.sh
+  DOMAIN_MODEL_TYPE_ISSUES.md \
+  SESSION_21_SUMMARY.md
 
 # Create a commit 
 git commit -m "feat(ui): integrate UI components with real-time data (UI focus)
@@ -25,7 +26,8 @@ git commit -m "feat(ui): integrate UI components with real-time data (UI focus)
 - Update ResourceDisplayEnhanced export for compatibility
 - Update MainGameLayout to use direct imports
 - Fix TimeControlsConnected to work with available selectors
-- Add focused TypeScript validation for UI components
+- Add focused validation for UI components
+- Document domain model type issues for future refactoring
 - Address type compatibility issues in UI code
 
 Note: This commit focuses only on UI components and ignores domain model type errors

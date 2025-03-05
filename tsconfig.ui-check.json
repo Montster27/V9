@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/interface/components/resources/ResourceDisplayEnhanced.tsx",
+    "src/interface/components/news/NewsStreamConnected.tsx",
+    "src/interface/components/time/TimeControlsConnected.tsx",
+    "src/interface/components/MainGameLayout.tsx"
+  ]
+}

@@ -6,8 +6,14 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useRealTimeGameLoop } from '../../../application/hooks/useRealTimeGameLoop';
-import { useAppSelector } from '../../../infrastructure/state/store';
-import { selectFormattedGameTime } from '../../../infrastructure/state/slices/timeSlice';
+import { useAppSelector, useAppDispatch } from '../../../infrastructure/state/store';
+import {
+  selectFormattedGameTime,
+  selectIsPaused,
+} from '../../../infrastructure/state/slices/timeSlice';
+import { getGameLoop } from '../../../infrastructure/state/slices/realTimeGameLoopSlice';
+import { defaultServiceRegistry } from '../../../infrastructure/state/middleware/simulation';
+import { syncPauseState } from '../../../infrastructure/state/middleware/simulation/syncTimeServices';
 import './TimeControlsEnhanced.css';
 
 interface TimeControlsProps {
@@ -25,9 +31,14 @@ const TimeControlsConnected: React.FC<TimeControlsProps> = ({
   className = '',
   autoStart = true,
 }) => {
+  const dispatch = useAppDispatch();
+
   // Get game loop state and controls
   const { isPaused, isRunning, fps, togglePause, start, stop, performanceWarning, updateConfig } =
     useRealTimeGameLoop(true);
+
+  // Also get the Redux time state for synchronization
+  const reduxIsPaused = useAppSelector(selectIsPaused);
 
   // Get game date and time from formatted selector
   const formattedGameTime = useAppSelector(selectFormattedGameTime);
@@ -41,25 +52,47 @@ const TimeControlsConnected: React.FC<TimeControlsProps> = ({
     { value: 4, label: '4x' },
   ];
 
-  // Auto-start the game loop
+  // Auto-start the game loop with improved error handling
   useEffect(() => {
     if (autoStart && !isRunning) {
-      start();
+      console.log('Auto-starting game loop...');
+      start().then((result) => {
+        if (result) {
+          console.log('Game loop started successfully');
+          // Force a resume to ensure the loop is running and not paused
+          if (isPaused) {
+            console.log('Auto-resuming paused game loop');
+            // Resume is failing - using togglePause instead as a workaround
+            togglePause();
+          }
+        } else {
+          console.error('Failed to start game loop');
+        }
+      });
     }
-  }, [autoStart, isRunning, start]);
+  }, [autoStart, isRunning, isPaused, start, togglePause]);
 
-  // Change game speed
+  // Change game speed with improved handling
   const handleSpeedChange = useCallback(
     (index: number) => {
       setSpeedIndex(index);
 
       // Update game loop configuration based on speed
       const speedValue = speedOptions[index].value;
+      console.log(`Changing speed to ${speedValue}x`);
+
+      // Update simulation tick rate based on speed
       updateConfig({
-        simulationTickRateMs: 1000 / speedValue, // Adjust simulation tick rate based on speed
+        simulationTickRateMs: 100 / speedValue, // Base rate is 100ms, adjust by speed multiplier
       });
+
+      // Ensure time is running after speed change
+      if (isPaused) {
+        console.log('Resuming after speed change');
+        togglePause(); // Use togglePause instead of resume
+      }
     },
-    [speedOptions, updateConfig]
+    [speedOptions, updateConfig, isPaused, togglePause]
   );
 
   // Format game date for display
@@ -103,7 +136,16 @@ const TimeControlsConnected: React.FC<TimeControlsProps> = ({
       <div className="time-controls">
         <button
           className={`pause-button ${isPaused ? 'paused' : 'playing'}`}
-          onClick={togglePause}
+          onClick={() => {
+            console.log('Toggle pause clicked, current isPaused:', isPaused);
+
+            // Get the game loop and simulation service
+            const gameLoop = getGameLoop();
+            const simulationService = defaultServiceRegistry.getSimulationService();
+
+            // Synchronize all time-related services
+            syncPauseState(dispatch, !isPaused, gameLoop, simulationService);
+          }}
           aria-label={isPaused ? 'Resume game' : 'Pause game'}
           title={isPaused ? 'Resume game' : 'Pause game'}
         >

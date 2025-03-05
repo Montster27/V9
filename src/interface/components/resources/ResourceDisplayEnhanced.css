@@ -1,0 +1,188 @@
+/**
+ * /src/interface/components/resources/ResourceDisplayEnhanced.css
+ *
+ * Enhanced styles for resource display with animations and transitions
+ */
+
+.resource-display {
+  background: rgba(30, 40, 50, 0.8);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.resource-display-title {
+  font-size: 1.2rem;
+  margin: 0 0 0.8rem 0;
+  color: #f0f0f0;
+  text-align: center;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.resource-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.8rem;
+}
+
+.resource {
+  position: relative;
+  padding: 0.6rem;
+  background: rgba(40, 50, 60, 0.7);
+  border-radius: 6px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.resource:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.resource-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.resource-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.resource-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #d0d0d0;
+}
+
+.resource-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.resource-trend-icon {
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.resource-bar {
+  height: 6px;
+  width: 100%;
+  background: rgba(30, 30, 30, 0.5);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.resource-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease-out;
+}
+
+/* Resource style variants */
+.resource-default {
+  color: #d0d0d0;
+}
+
+.resource-default.resource-bar-fill {
+  background: #606060;
+}
+
+.resource-success {
+  color: #4caf50;
+}
+
+.resource-success.resource-bar-fill {
+  background: #4caf50;
+}
+
+.resource-warning {
+  color: #ff9800;
+}
+
+.resource-warning.resource-bar-fill {
+  background: #ff9800;
+}
+
+.resource-danger {
+  color: #f44336;
+}
+
+.resource-danger.resource-bar-fill {
+  background: #f44336;
+}
+
+/* Tooltip styles */
+.resource-tooltip {
+  max-width: 240px;
+  font-size: 0.8rem;
+}
+
+.resource-tooltip-description {
+  margin: 0 0 0.5rem 0;
+  color: #f0f0f0;
+  line-height: 1.4;
+}
+
+.resource-tooltip-trend {
+  margin: 0;
+  color: #d0d0d0;
+  font-size: 0.75rem;
+}
+
+/* Animation classes */
+@keyframes pulse-up {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+@keyframes pulse-down {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.resource-increasing {
+  animation: pulse-up 2s infinite;
+}
+
+.resource-increasing.resource-bar-fill {
+  background-image: linear-gradient(90deg, 
+    rgba(255,255,255,0.1) 0%, 
+    rgba(255,255,255,0.2) 50%, 
+    rgba(255,255,255,0.1) 100%);
+  background-size: 200% 100%;
+  animation: gradient-slide 2s linear infinite;
+}
+
+.resource-decreasing {
+  animation: pulse-down 2s infinite;
+}
+
+@keyframes gradient-slide {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .resource-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .resource-grid {
+    grid-template-columns: 1fr;
+  }
+}
